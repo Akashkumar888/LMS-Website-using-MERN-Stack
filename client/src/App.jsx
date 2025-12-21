@@ -1,11 +1,14 @@
-import React from 'react'
+import React from "react";
+import { ToastContainer } from "react-toastify";
+import AppRoutes from "./routes/AppRoutes";
 
 const App = () => {
   return (
-    <div className='text-red-400'>
-      App
-    </div>
-  )
-}
+    <>
+      <AppRoutes />
+      <ToastContainer position="top-right" autoClose={3000} />
+    </>
+  );
+};
 
-export default App
+export default App;
