@@ -21,7 +21,7 @@ const CourseSection = () => {
         ))}
       </div>
 
-      <Link to={'/course-list'} onClick={()=>scrollTo(0,0)}>Show all courses
+      <Link to={'/course-list'} onClick={()=>scrollTo(0,0)} className='inline-block border border-gray-300 px-6 py-2 rounded-md text-gray-700 text-sm font-medium hover:bg-gray-100 transition'>Show all courses
       </Link>
     </div>
   )

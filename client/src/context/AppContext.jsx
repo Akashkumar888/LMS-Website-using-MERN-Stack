@@ -3,14 +3,16 @@ import { createContext, useEffect, useState } from "react";
 import { dummyCourses } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 
+
 const AppContext=createContext();
 
 export const AppContextProvider=({children})=>{
 
   const currency=import.meta.env.VITE_CURRENCY;
+  const navigate = useNavigate();   // ✅ USE HERE
 
-  const navigate=useNavigate();
   const [allCourses, setAllCourses] = useState([]);
+  const [isEducator, setIsEducator] = useState(true);
 
 
 // fetch all courses
@@ -25,9 +27,9 @@ const calculateRating=(course)=>{
  }
  let totalRating=0;
  course.courseRatings.forEach(rating=>{
-  totalRating+=rating.rating;
+ totalRating+=rating.rating;
  })
- return totalRating/course.courseRating.length;
+ return totalRating/course.courseRatings.length;
 }
 
 useEffect(()=>{
@@ -39,6 +41,8 @@ useEffect(()=>{
  allCourses,
  navigate,
  calculateRating,
+ isEducator,
+ setIsEducator
  };
 
   return (

@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 
 /* Layouts */
@@ -18,15 +17,13 @@ import AddCourse from "../pages/educator/AddCourse";
 import MyCousres from "../pages/educator/MyCousres";
 import StudentsEnrolled from "../pages/educator/StudentsEnrolled";
 
-
 const AppRoutes = () => {
   return (
     <Routes>
-
       {/* ===== STUDENT ROUTES ===== */}
       <Route element={<StudentLayout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/course-list" element={<CourseList />} />
+        <Route path="/course-list/:input?" element={<CourseList />} />
         <Route path="/course/:id" element={<CourseDetails />} />
         <Route path="/my-enrollments" element={<MyEnrollments />} />
         <Route path="/player/:courseId" element={<Player />} />
@@ -34,12 +31,13 @@ const AppRoutes = () => {
 
       {/* ===== EDUCATOR ROUTES ===== */}
       <Route path="/educator" element={<EducatorLayout />}>
-        <Route path="educator" element={<Dashboard />} />
+        {/* Dashboard (default page) */}
+        <Route index element={<Dashboard />} />
+
         <Route path="add-course" element={<AddCourse />} />
         <Route path="my-courses" element={<MyCousres />} />
         <Route path="student-enrolled" element={<StudentsEnrolled />} />
       </Route>
-
     </Routes>
   );
 };
@@ -47,7 +45,13 @@ const AppRoutes = () => {
 export default AppRoutes;
 
 
-
+// 🧠 Why index is IMPORTANT
+// index means default child route
+// When user visits:
+// /educator
+// 👉 <Dashboard /> loads automatically
+// No duplicate path
+// Clean routing
 
 // Component name should start with capital letter
 // import { Routes, Route } from "react-router-dom";
