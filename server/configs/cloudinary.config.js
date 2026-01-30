@@ -13,4 +13,5 @@ const connectCloudinary = async () => {
   console.log("✅ Cloudinary connected");
 };
 
+export { cloudinary };
 export default connectCloudinary;
