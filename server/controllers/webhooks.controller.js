@@ -51,7 +51,6 @@ export const clerkWebhooks = async (req, res) => {
   }
 };
 
-/* ================= STRIPE WEBHOOK ================= */
 export const stripewebhooks = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
@@ -68,22 +67,25 @@ export const stripewebhooks = async (req, res) => {
 
   switch (event.type) {
 
-    /* ✅ INDUSTRY STANDARD EVENT */
+    /* ✅ INDUSTRY STANDARD */
     case "checkout.session.completed": {
       const session = event.data.object;
 
       const { purchaseId } = session.metadata || {};
-      if (!purchaseId) break;
+      if (!purchaseId) {
+        console.log("❌ Missing purchaseId in metadata");
+        break;
+      }
 
       const purchase = await purchaseModel.findById(purchaseId);
-      if (!purchase) break;
+      if (!purchase || purchase.status === "completed") break;
 
       const user = await userModel.findById(purchase.userId);
       const course = await courseModel.findById(purchase.courseId);
 
       if (!user || !course) break;
 
-      // prevent duplicate push
+      // enroll user safely
       if (!course.enrolledStudents.includes(user._id)) {
         course.enrolledStudents.push(user._id);
         await course.save();
@@ -97,17 +99,6 @@ export const stripewebhooks = async (req, res) => {
       purchase.status = "completed";
       await purchase.save();
 
-      break;
-    }
-
-    case "payment_intent.payment_failed": {
-      const intent = event.data.object;
-      const { purchaseId } = intent.metadata || {};
-      if (purchaseId) {
-        await purchaseModel.findByIdAndUpdate(purchaseId, {
-          status: "failed",
-        });
-      }
       break;
     }
 
