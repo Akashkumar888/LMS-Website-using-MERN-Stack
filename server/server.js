@@ -1,6 +1,7 @@
+import "dotenv/config";// 🔥 FIRST LINE
+
 import http from "http";
 import app from "./app.js";
-import "dotenv/config";
 import connectDB from "./configs/db.config.js";
 import connectCloudinary from "./configs/cloudinary.config.js";
 

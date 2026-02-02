@@ -4,16 +4,23 @@ import webhookRouter from "./routes/webhook.routes.js";
 import educatorRouter from "./routes/educator.route.js";
 import {clerkMiddleware} from '@clerk/express'
 import courseRouter from "./routes/course.route.js";
+import userRouter from "./routes/user.route.js";
+import stripeRouter from "./routes/stripe.route.js";
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(clerkMiddleware());
 
 
 // IMPORTANT: Do NOT use express.json() before webhooks
+// 🔥 WEBHOOKS FIRST (NO AUTH, NO JSON)
 app.use("/webhooks", webhookRouter);
+app.use("/stripe", stripeRouter);
+
+
+// 🔐 AUTH AFTER WEBHOOKS
+app.use(clerkMiddleware());
 
 // Normal APIs after this can use JSON
 app.use(express.json());
@@ -26,6 +33,7 @@ app.get("/", (req, res) => {
 // rest api rule follow
 app.use('/api/educator',educatorRouter);
 app.use('/api/course',courseRouter);
+app.use('/api/user',userRouter);
 
 
 export default app;

@@ -1,6 +1,6 @@
 
 import express from "express";
-import { clerkWebhooks } from "../controllers/webhooks.controller.js";
+import { clerkWebhooks, stripewebhooks } from "../controllers/webhooks.controller.js";
 
 const webhookRouter = express.Router();
 
@@ -11,4 +11,9 @@ webhookRouter.post(
   clerkWebhooks
 );
 
+webhookRouter.post(
+  "/stripe",
+  express.raw({ type: "application/json" }),
+  stripewebhooks
+);
 export default webhookRouter;

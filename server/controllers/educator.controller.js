@@ -7,7 +7,10 @@ import userModel from "../models/user.model.js";
 // Update role to educator
 export const updateRoleToEducator = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const auth = req.auth();
+    const userId = auth?.userId;
+
+
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -29,7 +32,9 @@ export const updateRoleToEducator = async (req, res) => {
 
 export const addCourse = async (req, res) => {
   try {
-    const educatorId = req.auth.userId;
+    const auth = req.auth();
+    const { userId: educatorId } = auth?.userId;// userId alias as educatorId
+
     const { courseData } = req.body;
     const image = req.file;
 
@@ -65,7 +70,8 @@ export const addCourse = async (req, res) => {
 // get educator Courses
 export const getEducatorCourses=async(req,res)=>{
   try {
-    const educatorId = req.auth.userId;
+     const auth = req.auth();
+    const { userId: educatorId } = auth?.userId;// userId alias as educatorId
 
     const courses = await courseModel.find({ educator: educatorId });
     res.json({success:true,courses});
@@ -84,7 +90,8 @@ export const getEducatorCourses=async(req,res)=>{
 
 export const educatorDashboardData = async (req, res) => {
   try {
-    const educatorId = req.auth?.userId;
+     const auth = req.auth();
+    const { userId: educatorId } = auth?.userId;// userId alias as educatorId
 
     const courses = await courseModel.find(
       { educator: educatorId },
@@ -134,7 +141,8 @@ export const educatorDashboardData = async (req, res) => {
 // get enrolled students data with purchase data
 export const getEnrolledStudentsData = async (req, res) => {
   try {
-    const educatorId = req.auth?.userId;
+    const auth = req.auth();
+    const { userId: educatorId } = auth?.userId;// userId alias as educatorId
 
     const courses = await courseModel.find(
       { educator: educatorId },
