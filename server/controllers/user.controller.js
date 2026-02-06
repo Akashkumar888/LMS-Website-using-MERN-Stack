@@ -3,6 +3,7 @@ import userModel from "../models/user.model.js";
 import purchaseModel from "../models/purchase.model.js";
 import courseModel from "../models/course.model.js";
 import stripeInstance from "../configs/stripeInstance.config.js";
+import courseProgressModel from "../models/courseProgress.model.js";
 
 // get user data
 export const getUserData = async (req, res) => {
@@ -163,5 +164,109 @@ export const purchaseCourse = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+
+// Update user course Progress 
+export const updateUserCourseProgress = async (req, res) => {
+  try {
+    const auth = req.auth();
+    const userId = auth?.userId;
+    const { courseId, lectureId } = req.body;
+
+    if (!userId || !courseId || !lectureId) {
+      return res.status(400).json({ success: false, message: "Invalid Details" });
+    }
+
+    const progressData = await courseProgressModel.findOne({ userId, courseId });
+
+    if (progressData) {
+      if (progressData.lectureCompleted.includes(lectureId)) {
+        return res
+          .status(200)
+          .json({ success: true, message: "Lecture Already Completed" });
+      }
+
+      progressData.lectureCompleted.push(lectureId);
+      await progressData.save();
+    } else {
+      await courseProgressModel.create({
+        userId,
+        courseId,
+        lectureCompleted: [lectureId],
+      });
+    }
+
+    res.status(200).json({ success: true, message: "Progress Updated" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+// get User Course Progress
+export const getUserCourseProgress = async (req, res) => {
+  try {
+    const auth = req.auth();
+    const userId = auth?.userId;
+    const { courseId } = req.body;
+
+    if (!userId || !courseId) {
+      return res.status(400).json({ success: false, message: "Invalid Details" });
+    }
+
+    const progressData = await courseProgressModel.findOne({ userId, courseId });
+
+    res.status(200).json({ success: true, progressData });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+// Add user rating to course
+export const addUserRating = async (req, res) => {
+  try {
+    const auth = req.auth();
+    const userId = auth?.userId;
+    const { courseId, rating } = req.body;
+
+    // ✅ fixed condition
+    if (!courseId || !userId || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, message: "Invalid Details" });
+    }
+
+    const course = await courseModel.findById(courseId);
+    if (!course) {
+      return res.status(400).json({ success: false, message: "Course not found." });
+    }
+
+    const user = await userModel.findById(userId);
+    // ✅ fixed enrolled logic
+    if (!user || !user.enrolledCourse.includes(courseId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User has not purchased this course." });
+    }
+
+    // ✅ fixed comparison
+    const existingRatingIndex = course.courseRatings.findIndex(
+      (r) => r.userId.toString() === userId
+    );
+
+    if (existingRatingIndex > -1) {
+      course.courseRatings[existingRatingIndex].rating = rating;
+    } else {
+      course.courseRatings.push({ userId, rating });
+    }
+
+    await course.save();
+
+    res.status(200).json({ success: true, message: "Rating added" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
