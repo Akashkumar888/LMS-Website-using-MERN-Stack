@@ -10,7 +10,12 @@ import stripeRouter from "./routes/stripe.route.js";
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // ❌ NOT "*"
+    credentials: true,               // ✅ REQUIRED for Clerk
+  })
+);
 
 
 // IMPORTANT: Do NOT use express.json() before webhooks

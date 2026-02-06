@@ -7,23 +7,40 @@ import YouTube from "react-youtube";
 import Rating from "../../components/student/Rating";
 
 const Player = () => {
-  const { enrolledCourses, calculateChapterTime } = useContext(AppContext);
+  const { enrolledCourses, calculateChapterTime,userData,fetchUserEnrolledCourses } = useContext(AppContext);
   const { courseId } = useParams();
   const [courseData, setCourseData] = useState(null);
   const [openSections, setOpenSections] = useState({});
   const [playerData, setPlayerData] = useState(null);
+  const [progressData, setProgressData] = useState(null);
+  const [initialRating, setInitialRating] = useState(0);
+
 
   const getCourseData = () => {
-    const course = enrolledCourses.find((c) => c._id === courseId);
-    if (course) setCourseData(course);
+    enrolledCourses.map((course)=>{
+      if(course._id === courseId){
+        setCourseData(course)
+        course.courseRating.map((item)=>{
+          if(item.userId === userData._id){
+            setInitialRating(item.rating)
+          }
+        })
+      }
+    })
   };
+
+
 
   const toggleSection = (index) => {
     setOpenSections((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
+
+
   useEffect(() => {
-    getCourseData();
+    if(enrolledCourses.length > 0){
+      getCourseData();
+    }
   }, [enrolledCourses, courseId]);
 
   return (

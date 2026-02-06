@@ -4,6 +4,8 @@ import { assets } from '../../assets/assets'
 import { Link, useLocation } from 'react-router-dom'
 import { useClerk,UserButton,useUser } from '@clerk/clerk-react'
 import AppContext from '../../context/AppContext'
+import api from '../../axios/api'
+import { toast } from 'react-toastify'
 
 const Navbar = () => {
 const location =useLocation();
@@ -15,13 +17,36 @@ const {navigate,isEducator,setIsEducator}=useContext(AppContext);
  const {openSignIn}=useClerk();
  const {user}=useUser();
 
+
+ const becomeEducator = async () => {
+  try {
+    if (user?.publicMetadata?.role === "educator") {
+      navigate("/educator");
+      return;
+    }
+
+    const { data } = await api.patch("/api/educator/update-role");
+
+    if (data.success) {
+      toast.success(data.message);
+      // force Clerk user refresh
+      window.location.reload();
+    } else {
+      toast.error(data.message);
+    }
+  } catch (error) {
+    toast.error(error.message);
+  }
+};
+
+
   return (
     <div className={`flex items-center justify-between px-4 sm:px-10 md:px-14 lg:px-36 border-b border-gray-500 py-4 ${isCourseListPage ? 'bg-white' : 'bg-cyan-100/70'}`}>
       <img onClick={()=>navigate('/')} src={assets.logo} alt="Logo" className='w-28 lg:w-32 cursor-pointer'/>
       <div className='hidden md:flex items-center gap-5 text-gray-500'>
         <div className='flex items-center gap-5'>
           { user && <>
-            <button onClick={()=>navigate('/educator')} className='cursor-pointer'>{isEducator ?"Educator Dashboard" :'Become Educator'}</button>
+            <button onClick={becomeEducator} className='cursor-pointer'>{isEducator ?"Educator Dashboard" :'Become Educator'}</button>
           <Link to={"/my-enrollments"}>My Enrollments</Link>
           </>
           }
@@ -35,7 +60,7 @@ const {navigate,isEducator,setIsEducator}=useContext(AppContext);
       <div className='md:hidden flex items-center gap-2 sm:gap-5 text-gray-500'>
         <div className='flex items-center gap-1 sm:gap-2 max-sm:text-xs'>
           { user && <>
-            <button onClick={()=>navigate('/educator')} className='cursor-pointer'>{isEducator ?"Educator Dashboard" :'Become Educator'}</button>
+            <button onClick={becomeEducator} className='cursor-pointer'>{isEducator ?"Educator Dashboard" :'Become Educator'}</button>
           <Link to={"/my-enrollments"}>My Enrollments</Link>
           </>
           }

@@ -6,6 +6,8 @@ import { assets } from "../../assets/assets";
 import humanizeDuration from "humanize-duration";
 import Footer from "../../components/student/Footer";
 import YouTube from "react-youtube";
+import api from "../../axios/api";
+import { toast } from "react-toastify";
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -21,17 +23,54 @@ const CourseDetails = () => {
     calculateChapterTime,
     calculateCourseDuration,
     calculateNoOfLectures,
-    currency,
+    currency,userData
   } = useContext(AppContext);
 
-  const fetchCourseData = () => {
-    const findCourse = allCourses.find((course) => course._id === id);
-    if (findCourse) setCourseData(findCourse);
+
+  const fetchCourseData =async () => {
+    try {
+      const {data}=await api.get(`/api/course/${id}`);
+      if(data.success){
+       setCourseData(data.courseData);
+      }
+      else{
+       toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
+
+
+  const enrollCourse=async()=>{
+    try {
+      if(!userData)return toast.warn('Login to enroll');
+      if(isAlreadyEnrolled){
+        return toast.warn('Already Enrolled');
+      }
+      const {data}=await api.post(`/api/user/purchase`,{courseId:courseData._id});
+      if(data.success){
+        const {session_url}=data;
+        window.location.replace(session_url);
+      }
+      else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
 
   useEffect(() => {
     fetchCourseData();
-  }, [allCourses]);
+  }, []);
+
+
+  useEffect(() => {
+    if(userData && courseData){
+      setIsAlreadyEnrolled(userData.enrolledCourses.includes(courseData._id));
+    }
+  }, [userData,courseData]);
 
   const toggleSection = (index) => {
     setOpenSections((prev) => ({
@@ -90,7 +129,7 @@ const CourseDetails = () => {
           </div>
 
           <p className="text-sm">
-            Course by <span className="text-blue-600">GreatStack</span>
+            Course by <span className="text-blue-600">{courseData.educator.name}</span>
           </p>
 
           <div className="pt-8 text-gray-800">
@@ -256,7 +295,7 @@ const CourseDetails = () => {
               </div>
             </div>
 
-            <button className="md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium cursor-pointer">
+            <button onClick={enrollCourse} className="md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium cursor-pointer">
               {" "}
               {isAlreadyEnrolled ? "Already Enrolled" : "Enroll Now"}{" "}
             </button>

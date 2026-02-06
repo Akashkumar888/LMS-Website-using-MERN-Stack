@@ -1,17 +1,23 @@
 import express from "express";
 import { requireAuth } from "@clerk/express";
-import { addCourse, educatorDashboardData, getEducatorCourses, getEnrolledStudentsData, updateRoleToEducator } from "../controllers/educator.controller.js";
+import {
+  addCourse,
+  educatorDashboardData,
+  getEducatorCourses,
+  getEnrolledStudentsData,
+  updateRoleToEducator,
+} from "../controllers/educator.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 import { authEducator } from "../middlewares/authEducator.middleware.js";
 
 const educatorRouter = express.Router();
 
-// Add educator role (protected + REST correct)
-educatorRouter.post(
+educatorRouter.patch(
   "/update-role",
   requireAuth(),
   updateRoleToEducator
 );
+
 educatorRouter.post(
   "/add-course",
   requireAuth(),
@@ -19,9 +25,26 @@ educatorRouter.post(
   upload.single("image"),
   addCourse
 );
-educatorRouter.get('/courses',authEducator,getEducatorCourses);
-educatorRouter.get('/dashboard',authEducator,educatorDashboardData);
-educatorRouter.get('/enrolled-students',authEducator,getEnrolledStudentsData);
 
+educatorRouter.get(
+  "/courses",
+  requireAuth(),
+  authEducator,
+  getEducatorCourses
+);
+
+educatorRouter.get(
+  "/dashboard",
+  requireAuth(),
+  authEducator,
+  educatorDashboardData
+);
+
+educatorRouter.get(
+  "/enrolled-students",
+  requireAuth(),
+  authEducator,
+  getEnrolledStudentsData
+);
 
 export default educatorRouter;
