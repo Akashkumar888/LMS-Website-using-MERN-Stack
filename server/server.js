@@ -19,12 +19,24 @@ await connectDB();
 await connectCloudinary();
 
 // Middleware
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://lms-website-using-mern-stack.vercel.app"
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // ❌ NOT "*"
-    credentials: true,               // ✅ REQUIRED for Clerk
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
+
 
 
 // IMPORTANT: Do NOT use express.json() before webhooks
