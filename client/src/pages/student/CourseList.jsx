@@ -9,7 +9,6 @@ import Footer from "../../components/student/Footer";
 const CourseList = () => {
   const { navigate, allCourses } = useContext(AppContext);
   const { input } = useParams();
-  console.log(input);
 
   const [filteredCourse, setFilteredCourse] = useState([]);
 

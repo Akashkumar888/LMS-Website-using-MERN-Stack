@@ -9,28 +9,35 @@ import { data } from 'react-router-dom';
 
 const MyEnrollments = () => {
 
-  const {enrolledCourses,setEnrolledCourses,fetchUserEnrolledCourses,calculateCourseDuration,navigate,userData,fetchUserEnrolledCourses,calculateNoOfLectures}=useContext(AppContext);
+  const {enrolledCourses,setEnrolledCourses,fetchUserEnrolledCourses,calculateCourseDuration,navigate,userData,calculateNoOfLectures}=useContext(AppContext);
 
 
 
 const [progressArray, setProgressArray] = useState([]);
 
 
-const getCourseProgress=async()=>{
+const getCourseProgress = async () => {
   try {
-    const tempProgressArray=await Promise.all(
-      enrolledCourses.map(async (course)=>{
-        const {data}=await api.post(`/api/user/get-user-course-progress`,{courseId:course._id});
-        let totalLectures=calculateNoOfLectures(course);
-        const lectureCompleted=data.progressData?data.progressData.lectureCompleted.length : 0;
-        return {totalLectures,lectureCompleted};
+    const tempProgressArray = await Promise.all(
+      enrolledCourses.map(async (course) => {
+        const { data } = await api.post(
+          "/api/user/get-course-progress",
+          { courseId: course._id }
+        );
+
+        const totalLectures = calculateNoOfLectures(course);
+        const lectureCompleted =
+          data.progressData?.lectureCompleted?.length || 0;
+
+        return { totalLectures, lectureCompleted };
       })
-    )
+    );
     setProgressArray(tempProgressArray);
   } catch (error) {
     toast.error(error.message);
   }
-}
+};
+
 
 
 useEffect(()=>{

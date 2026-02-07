@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import uniqid from "uniqid";
 import Quill from "quill";
 import { assets } from "../../assets/assets";
+import { toast } from "react-toastify";
+import api from "../../axios/api";
 
 const AddCourse = () => {
   const quillRef = useRef(null);
@@ -45,7 +47,7 @@ const AddCourse = () => {
 
     if (action === "remove") {
       setChapters((prev) =>
-        prev.filter((chapter) => chapter.chapterId !== chapterId)
+        prev.filter((chapter) => chapter.chapterId !== chapterId),
       );
     }
 
@@ -54,8 +56,8 @@ const AddCourse = () => {
         prev.map((chapter) =>
           chapter.chapterId === chapterId
             ? { ...chapter, collapsed: !chapter.collapsed }
-            : chapter
-        )
+            : chapter,
+        ),
       );
     }
   };
@@ -75,11 +77,11 @@ const AddCourse = () => {
             ? {
                 ...chapter,
                 chapterContent: chapter.chapterContent.filter(
-                  (lec) => lec.lectureId !== lectureId
+                  (lec) => lec.lectureId !== lectureId,
                 ),
               }
-            : chapter
-        )
+            : chapter,
+        ),
       );
     }
   };
@@ -108,8 +110,8 @@ const AddCourse = () => {
                 },
               ],
             }
-          : chapter
-      )
+          : chapter,
+      ),
     );
 
     setShowPopup(false);
@@ -124,20 +126,34 @@ const AddCourse = () => {
   // ------------------ SUBMIT COURSE ------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      if (!image) return toast.error("Thumbnail Not Selected");
+      const courseData = {
+        courseTitle,
+        courseDescription: quillRef.current.root.innerHTML,
+        coursePrice: Number(coursePrice),
+        discount: Number(discount),
+        courseContent: chapters,
+      };
 
-    const description = quillRef.current?.root.innerHTML || "";
-
-    const payload = {
-      courseTitle,
-      description,
-      coursePrice: Number(coursePrice),
-      discount: Number(discount),
-      chapters,
-    };
-
-    console.log("FINAL COURSE PAYLOAD:", payload);
-
-    alert("Course ready to submit (check console)");
+      const formData = new FormData();
+      formData.append("courseData", JSON.stringify(courseData));
+      formData.append("image", image);
+      const { data } = await api.post(`/api/educator/add-course`, formData);
+      if (data.success) {
+        toast.success(data.message);
+        setCourseTitle("");
+        setCoursePrice(0);
+        setDiscount(0);
+        setImage(null);
+        setChapters([]);
+        quillRef.current.root.innerHTML = "";
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   // ------------------ INIT QUILL ------------------
@@ -249,9 +265,7 @@ const AddCourse = () => {
                     src={assets.dropdown_icon}
                     alt=""
                     width={14}
-                    onClick={() =>
-                      handleChapter("toggle", chapter.chapterId)
-                    }
+                    onClick={() => handleChapter("toggle", chapter.chapterId)}
                     className={`mr-2 cursor-pointer transition-all ${
                       chapter.collapsed ? "-rotate-90" : ""
                     }`}
@@ -268,9 +282,7 @@ const AddCourse = () => {
                 <img
                   src={assets.cross_icon}
                   alt=""
-                  onClick={() =>
-                    handleChapter("remove", chapter.chapterId)
-                  }
+                  onClick={() => handleChapter("remove", chapter.chapterId)}
                   className="cursor-pointer"
                 />
               </div>
@@ -293,10 +305,7 @@ const AddCourse = () => {
                         >
                           Link
                         </a>{" "}
-                        –{" "}
-                        {lecture.isPreviewFree
-                          ? "Free Preview"
-                          : "Paid"}
+                        – {lecture.isPreviewFree ? "Free Preview" : "Paid"}
                       </span>
 
                       <img
@@ -307,7 +316,7 @@ const AddCourse = () => {
                           handleLecture(
                             "remove",
                             chapter.chapterId,
-                            lecture.lectureId
+                            lecture.lectureId,
                           )
                         }
                       />
@@ -316,9 +325,7 @@ const AddCourse = () => {
 
                   <div
                     className="inline-flex bg-gray-100 p-2 rounded cursor-pointer mt-2"
-                    onClick={() =>
-                      handleLecture("add", chapter.chapterId)
-                    }
+                    onClick={() => handleLecture("add", chapter.chapterId)}
                   >
                     + Add Lecture
                   </div>
@@ -338,9 +345,7 @@ const AddCourse = () => {
           {showPopup && (
             <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
               <div className="bg-white text-gray-700 p-4 rounded relative w-full max-w-80">
-                <h2 className="text-lg font-semibold mb-4">
-                  Add Lecture
-                </h2>
+                <h2 className="text-lg font-semibold mb-4">Add Lecture</h2>
 
                 <div className="mb-2">
                   <p>Lecture Title</p>

@@ -17,6 +17,9 @@ import AddCourse from "../pages/educator/AddCourse";
 import MyCousres from "../pages/educator/MyCousres";
 import StudentsEnrolled from "../pages/educator/StudentsEnrolled";
 
+/* Common */
+import PaymentRedirect from "../pages/common/PaymentRedirect";
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -27,13 +30,14 @@ const AppRoutes = () => {
         <Route path="/course/:id" element={<CourseDetails />} />
         <Route path="/my-enrollments" element={<MyEnrollments />} />
         <Route path="/player/:courseId" element={<Player />} />
+
+        {/* ✅ Stripe success redirect */}
+        <Route path="/loading/my-enrollments" element={<PaymentRedirect />} />
       </Route>
 
       {/* ===== EDUCATOR ROUTES ===== */}
       <Route path="/educator" element={<EducatorLayout />}>
-        {/* Dashboard (default page) */}
         <Route index element={<Dashboard />} />
-
         <Route path="add-course" element={<AddCourse />} />
         <Route path="my-courses" element={<MyCousres />} />
         <Route path="student-enrolled" element={<StudentsEnrolled />} />
@@ -43,29 +47,3 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
-
-
-// 🧠 Why index is IMPORTANT
-// index means default child route
-// When user visits:
-// /educator
-// 👉 <Dashboard /> loads automatically
-// No duplicate path
-// Clean routing
-
-// Component name should start with capital letter
-// import { Routes, Route } from "react-router-dom";
-// import Home from "../pages/student/Home";
-// import MainLayout from "../layouts/MainLayout";
-
-// const AppRoutes = () => {
-//   return (
-//     <Routes>
-//       <Route element={<MainLayout />}>
-//         <Route path="/" element={<Home />} />
-//       </Route>
-//     </Routes>
-//   );
-// };
-
-// export default AppRoutes;

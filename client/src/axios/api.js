@@ -27,6 +27,7 @@
 
 
 // this is use when clerkMiddleware use 
+// axios/api.js
 import axios from "axios";
 
 const api = axios.create({
@@ -34,19 +35,16 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// 🔐 Clerk-safe token injection (NO hooks)
-api.interceptors.request.use(
-  async (config) => {
-    if (window.Clerk?.session) {
-      const token = await window.Clerk.session.getToken();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+api.interceptors.request.use(async (config) => {
+  if (window.Clerk?.session) {
+    const token = await window.Clerk.session.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  }
+  return config;
+});
 
 export default api;
+
 

@@ -1,19 +1,19 @@
-
 import { Navigate } from "react-router-dom";
 import { useContext } from "react";
 import AppContext from "../context/AppContext";
 
 const ProtectedRoute = ({ children }) => {
-  const { user } = useContext(AppContext);
+  const { userData } = useContext(AppContext);
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  if (!userData) {
+    return <Navigate to="/" replace />;
   }
 
   return children;
 };
 
 export default ProtectedRoute;
+
 // Using Protected Route
 // <Route
 //   path="/dashboard"

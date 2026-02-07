@@ -1,10 +1,10 @@
+import express from "express";
+import { getAllCourse, getCourseId } from "../controllers/course.controller.js";
 
-import express from 'express'
-import { requireAuth } from "@clerk/express";
-import { getAllCourse, getCourseId } from '../controllers/course.controller.js';
-const courseRouter=express.Router();
+const courseRouter = express.Router();
 
-courseRouter.get('/all',requireAuth(),getAllCourse);
-courseRouter.get('/:id',requireAuth() ,getCourseId);
+// ✅ PUBLIC ROUTES
+courseRouter.get("/all", getAllCourse);
+courseRouter.get("/:id", getCourseId);
 
 export default courseRouter;

@@ -162,11 +162,16 @@ export const getEnrolledStudentsData = async (req, res) => {
     });
 
     const enrolledStudents = purchases.map(p => ({
-      userId: p.userId,
-      courseTitle: courseMap.get(p.courseId.toString()),
-      purchasedAt: p.createdAt,
-      amount: p.amount,
-    }));
+  student: {
+    _id: p.userId,
+    name: userMap.get(p.userId)?.name,
+    imageUrl: userMap.get(p.userId)?.imageUrl,
+  },
+  courseTitle: courseMap.get(p.courseId.toString()),
+  purchasedAt: p.createdAt,
+  amount: p.amount,
+}));
+
 
     res.json({ success: true, enrolledStudents });
   } catch (error) {

@@ -71,7 +71,7 @@ const courseSchema = new mongoose.Schema(
 
     courseContent: [chapterSchema],
 
-    courseRating: [ratingSchema],
+    courseRatings: [ratingSchema],
 
     educator: {
       type: String,

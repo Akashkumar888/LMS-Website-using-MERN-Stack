@@ -1,16 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { dummyStudentEnrolled } from "../../assets/assets";
 import Loading from "../../components/student/Loading";
+import AppContext from "../../context/AppContext";
+import api from "../../axios/api";
+import { toast } from "react-toastify";
 
 const StudentsEnrolled = () => {
+  const {isEducator}=useContext(AppContext);
+
   const [enrolledStudents, setEnrolledStudents] = useState(null);
   const fetchEnrolledStudents = async () => {
-    setEnrolledStudents(dummyStudentEnrolled);
+    try {
+      const {data}=await api.get(`/api/educator/enrolled-students`)
+      if(data.success){
+        setEnrolledStudents(data.enrolledStudents.reverse());
+      }
+      else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
-    fetchEnrolledStudents();
-  }, []);
+    if(isEducator){
+      fetchEnrolledStudents();
+    }
+  }, [isEducator]);
+
 
   return enrolledStudents ? (
     <div className="min-h-screen flex flex-col items-start justify-between md:p-8 p-4 pt-8 pb-0">
@@ -36,14 +54,10 @@ const StudentsEnrolled = () => {
                   {index + 1}
                 </td>
 
-                <td className="md:px-4 px-2 py-3 flex items-center space-x-3">
-                  <img
-                    src={item.student.imageUrl}
-                    alt="Profile"
-                    className="w-9 h-9 rounded-full"
-                  />
-                  <span className="truncate">{item.student.name}</span>
-                </td>
+                <td className="md:px-4 px-2 py-3 truncate">
+  {item.userId}
+</td>
+
 
                 <td className="px-4 py-3 truncate">{item.courseTitle}</td>
 

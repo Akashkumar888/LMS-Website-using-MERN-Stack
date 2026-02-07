@@ -3,13 +3,25 @@ import React, { useContext, useEffect, useState } from 'react'
 import AppContext from '../../context/AppContext';
 import { assets, dummyDashboardData } from '../../assets/assets';
 import Loading from '../../components/student/Loading';
+import api from '../../axios/api';
+import { toast } from 'react-toastify';
 
 const Dashboard = () => {
   const [dashboardData,setDashboardData]=useState(null);
-  const {currency}=useContext(AppContext);
+  const {currency,isEducator}=useContext(AppContext);
 
   const fetchDashBoardData=async()=>{
-    setDashboardData(dummyDashboardData);
+    try {
+      const {data}=await api.get(`/api/educator/dashboard`);
+      if(data.success){
+        setDashboardData(data.dashboardData);
+      }
+      else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   }
   
 
@@ -45,9 +57,10 @@ const Dashboard = () => {
         <div className="flex items-center gap-3 shadow-card border border-blue-500 p-4 w-58 rounded-md">
           <img src={assets.earning_icon} alt="earning_icon" />
           <div>
-            <p className="text-2xl font-medium text-gray-600">
-              {dashboardData.totalEarnings}
-            </p>
+         <p className="text-2xl font-medium text-gray-600">
+  {currency}{(dashboardData.totalEarnings / 100).toFixed(2)}
+</p>
+
             <p className="text-base text-gray-500">Total Earning</p>
           </div>
         </div>
@@ -75,14 +88,10 @@ const Dashboard = () => {
           {index + 1}
         </td>
 
-        <td className="md:px-4 px-2 py-3 flex items-center space-x-3">
-          <img
-            src={item.student.imageUrl}
-            alt="Profile"
-            className="w-9 h-9 rounded-full"
-          />
-          <span className="truncate">{item.student.name}</span>
-        </td>
+        <td className="md:px-4 px-2 py-3 truncate">
+  {item.userId}
+</td>
+
 
         <td className="px-4 py-3 truncate">
           {item.courseTitle}

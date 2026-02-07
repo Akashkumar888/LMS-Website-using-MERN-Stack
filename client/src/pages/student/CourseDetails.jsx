@@ -18,59 +18,73 @@ const CourseDetails = () => {
   const [playerData, setPlayerData] = useState(null);
 
   const {
-    allCourses,
     calculateRating,
     calculateChapterTime,
     calculateCourseDuration,
     calculateNoOfLectures,
-    currency,userData
+    currency,
+    userData,
   } = useContext(AppContext);
 
+  const ratings = Array.isArray(courseData?.courseRatings)
+    ? courseData.courseRatings
+    : [];
 
-  const fetchCourseData =async () => {
+  const students = Array.isArray(courseData?.enrolledStudents)
+    ? courseData.enrolledStudents
+    : [];
+
+  const chapters = Array.isArray(courseData?.courseContent)
+    ? courseData.courseContent
+    : [];
+
+  const fetchCourseData = async () => {
     try {
-      const {data}=await api.get(`/api/course/${id}`);
-      if(data.success){
-       setCourseData(data.courseData);
-      }
-      else{
-       toast.error(data.message);
+      const { data } = await api.get(`/api/course/${id}`);
+      if (data.success) {
+        setCourseData(data.courseData);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.message);
     }
   };
 
-
-  const enrollCourse=async()=>{
+  const enrollCourse = async () => {
     try {
-      if(!userData)return toast.warn('Login to enroll');
-      if(isAlreadyEnrolled){
-        return toast.warn('Already Enrolled');
+      if (!userData) return toast.warn("Login to enroll");
+      if (isAlreadyEnrolled) {
+        return toast.warn("Already Enrolled");
       }
-      const {data}=await api.post(`/api/user/purchase`,{courseId:courseData._id});
-      if(data.success){
-        const {session_url}=data;
+      const { data } = await api.post(`/api/user/purchase`, {
+        courseId: courseData._id,
+      });
+      if (data.success) {
+        const { session_url } = data;
         window.location.replace(session_url);
-      }
-      else{
+      } else {
         toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.message);
     }
-  }
+  };
 
   useEffect(() => {
     fetchCourseData();
   }, []);
 
-
   useEffect(() => {
-    if(userData && courseData){
-      setIsAlreadyEnrolled(userData.enrolledCourses.includes(courseData._id));
+    if (userData && courseData) {
+      setIsAlreadyEnrolled(
+        Array.isArray(userData.enrolledCourses) &&
+          userData.enrolledCourses.some(
+            (c) => (c._id ? c._id : c).toString() === courseData._id,
+          ),
+      );
     }
-  }, [userData,courseData]);
+  }, [userData, courseData]);
 
   const toggleSection = (index) => {
     setOpenSections((prev) => ({
@@ -116,20 +130,19 @@ const CourseDetails = () => {
             </div>
 
             <p className="text-blue-600">
-              ({courseData.courseRatings.length}
-              {courseData.courseRatings.length > 1 ? " ratings" : " rating"})
+              ({ratings.length} {ratings.length === 1 ? "rating" : "ratings"})
             </p>
 
             <p>
-              {courseData.enrolledStudents.length}
-              {courseData.enrolledStudents.length > 1
-                ? " students"
-                : " student"}
+              {students.length} {students.length === 1 ? "student" : "students"}
             </p>
           </div>
 
           <p className="text-sm">
-            Course by <span className="text-blue-600">{courseData.educator.name}</span>
+            Course by{" "}
+            <span className="text-blue-600">
+              {courseData.educator?.name || "Instructor"}
+            </span>
           </p>
 
           <div className="pt-8 text-gray-800">
@@ -196,7 +209,7 @@ const CourseDetails = () => {
                               <p>
                                 {humanizeDuration(
                                   lecture.lectureDuration * 60 * 1000,
-                                  { units: ["h", "m"] }
+                                  { units: ["h", "m"] },
                                 )}
                               </p>
                             </div>
@@ -226,31 +239,23 @@ const CourseDetails = () => {
 
         {/* right column */}
         <div className="max-w-course-card z-10 shadow-custom-card rounded-t-md md:rounded-none overflow-hidden bg-white min-w-[300px] sm:min-w-[420px]">
-
-          
-
-          {
-              playerData ? (
-                <YouTube
-                  videoId={playerData.videoId}
-                  opts={{ playerVars: { autoplay: 1 } }}
-                  iframeClassName="w-full aspect-video"
-                />
-              ) : (
-                <img src={courseData.courseThumbnail} alt="" />
-              )}
-
-
+          {playerData ? (
+            <YouTube
+              videoId={playerData.videoId}
+              opts={{ playerVars: { autoplay: 1 } }}
+              iframeClassName="w-full aspect-video"
+            />
+          ) : (
+            <img src={courseData.courseThumbnail} alt="" />
+          )}
 
           <div className="p-5">
             <div className="flex items-center gap-2">
-
-            <img
-                  className="w-3.5"
-                  src={assets.time_left_clock_icon}
-                  alt="time left clock icon"
-                />
-              
+              <img
+                className="w-3.5"
+                src={assets.time_left_clock_icon}
+                alt="time left clock icon"
+              />
 
               <p className="text-red-500 text-sm">
                 <span className="font-medium">5 days</span> left at this price!
@@ -295,7 +300,10 @@ const CourseDetails = () => {
               </div>
             </div>
 
-            <button onClick={enrollCourse} className="md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium cursor-pointer">
+            <button
+              onClick={enrollCourse}
+              className="md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium cursor-pointer"
+            >
               {" "}
               {isAlreadyEnrolled ? "Already Enrolled" : "Enroll Now"}{" "}
             </button>
